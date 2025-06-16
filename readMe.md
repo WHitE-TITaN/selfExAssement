@@ -2,6 +2,25 @@
 
 Welcome to the **Neural Network** project! This project showcases a C++-based neural network that integrates **TinyLLaMA** through the [llama.cpp](https://github.com/ggerganov/llama.cpp) backend. This setup allows you to run LLaMA-based models locally from a clean executable, and it's all structured to be accessible and customizable.
 
+## 📁 Project Structure
+
+```
+selfExAssessment/
+  └── Neural-Network/
+        ├── headers/
+        │   └── tinyllama.gguf        # Your downloaded TinyLLaMA 
+    model file
+        └── llama.cpp/                # Submodule containing 
+    llama.cpp
+        ├── src/
+        │   └── main.cpp              # Entry point to your 
+    neural network logic
+        ├── build/                    # Build directory
+        │   └── Release/NeuralNetwork.exe
+        ├── CMakeLists.txt
+        └── README.md
+```
+
 ## 🔗 Setup and llama.dll Missing? Fix it like this!
 
 ### ⚒️ Setup
