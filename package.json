@@ -1,0 +1,23 @@
+{
+  "name": "selfexassement",
+  "version": "1.0.0",
+  "description": "a ai assistant that helps in making notes summarizing topics and helps in solving question",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WHitE-TITaN/selfExAssement.git"
+  },
+  "author": "WHitE-TITan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/WHitE-TITaN/selfExAssement/issues"
+  },
+  "homepage": "https://github.com/WHitE-TITaN/selfExAssement#readme",
+  "keywords": [],
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
