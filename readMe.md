@@ -9,12 +9,10 @@ selfExAssessment/
   └── Neural-Network/
         ├── headers/
         │   └── tinyllama.gguf        # Your downloaded TinyLLaMA 
-    model file
-        └── llama.cpp/                # Submodule containing 
-    llama.cpp
+      llama.cpp
         ├── src/
         │   └── main.cpp              # Entry point to your 
-    neural network logic
+      neural network logic
         ├── build/                    # Build directory
         │   └── Release/NeuralNetwork.exe
         ├── CMakeLists.txt
