@@ -38,7 +38,7 @@ class assistant{
             
             //loading model in
             model_params = llama_model_default_params();
-            model = llama_model_load_from_file("C:/Users/dk488/Downloads/llama-2-7b-chat.Q8_0.gguf", model_params);
+            model = llama_model_load_from_file("C:/Users/dk488/Documents/GitHub/shelfExAssement/Neural-Network/llama-2-7b-chat.Q8_0.gguf", model_params);
             if (!model) {
                 std::cerr << "❌ Failed to load model\n";
                 return;
@@ -61,7 +61,7 @@ class assistant{
 
         // New method to set prompt from external input
         void setPrompt(const std::string& inputText) {
-            prompt = "User: Please summarize the following document into 5-8 informative cards, each 2-4 sentences. \n\n" + inputText + "\n\nAssistant: ";
+            prompt = "User: Please summarize the following document into at least 6 informative cards (preferably 7 or 8), each 2-4 sentences. Number each card as 'Card 1:', 'Card 2:', etc. Do not skip any numbers. \n\n" + inputText + "\n\nAssistant: ";
             prompt_tokens.resize(prompt.size() + 16);
         }
 
@@ -97,7 +97,7 @@ class assistant{
             std::cout << prompt;
 
             llama_token token;
-            for (int i = 0; i < 512; ++i) {
+            for (int i = 0; i < 1024; ++i) {
                 token = llama_sampler_sample(sampler, ctx, -1);
 
                 // Break on EOS
