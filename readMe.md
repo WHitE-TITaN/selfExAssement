@@ -38,6 +38,12 @@ A modern web application that processes documents and text to generate AI-powere
    ```bash
    npm install
    ```
+**IMPORTANT - Additionaly**
+
+---
+
+download a llama.gguf model for the project the efficiency and accuricy might vary accordingly.<br>
+example link - https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF
 
 3. **Build the C++ AI model (optional)**
    ```bash
