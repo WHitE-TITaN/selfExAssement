@@ -1,8 +1,8 @@
 {
   "name": "selfexassement",
   "version": "1.0.0",
-  "description": "a ai assistant that helps in making notes summarizing topics and helps in solving question",
-  "main": "index.jsn",
+  "description": "AI Document Processor with ChatGPT-style interface for generating summary cards from documents and text",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js"
@@ -19,6 +19,8 @@
   "homepage": "https://github.com/WHitE-TITaN/selfExAssement#readme",
   "keywords": [],
   "dependencies": {
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "multer": "^2.0.1",
+    "pdf-parse": "^1.1.1"
   }
 }

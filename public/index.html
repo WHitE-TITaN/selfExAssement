@@ -3,9 +3,346 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+    <title>AI Document Processor - ChatGPT Style</title>
+    <style>
+        .card {
+            background: #007bff;
+            color: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+            transition: transform 0.2s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .card-content p {
+            margin: 0;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+        
+        .processing-info {
+            margin: 20px 0 10px 0;
+            text-align: center;
+        }
+        
+        .info-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        
+        .info-badge .method {
+            font-weight: 600;
+            color: #007bff;
+        }
+        
+        .info-badge .time {
+            background: #e9ecef;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Hello Bitch</h1>
+    <div class="chat-container">
+        <!-- Header -->
+        <div class="chat-header">
+            <h1>🤖 AI Document Processor</h1>
+            <p>Upload files or type text to generate AI-powered summary cards</p>
+        </div>
+
+        <!-- Chat Messages Area -->
+        <div class="chat-messages" id="chatMessages">
+            <!-- Welcome message -->
+            <div class="message assistant-message">
+                <div class="message-content">
+                    <p>Hello! I can help you create summary cards from documents or text. You can:</p>
+                    <ul>
+                        <li>📄 Upload a TXT or PDF file (max 5MB)</li>
+                        <li>✍️ Type or paste text directly (max 50,000 characters)</li>
+                    </ul>
+                    <p>I'll generate informative cards with key insights from your content.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="chat-input-container">
+            <!-- File Upload Section -->
+            <div class="input-section">
+                <div class="file-upload-area" id="fileUploadArea">
+                    <input type="file" id="fileInput" accept=".txt,.pdf" style="display: none;" />
+                    <div class="upload-placeholder" onclick="document.getElementById('fileInput').click()">
+                        <span>📁 Click to upload file (TXT/PDF)</span>
+                        <small>Maximum 5MB</small>
+                    </div>
+                </div>
+                <div class="file-info" id="fileInfo" style="display: none;">
+                    <span id="fileName"></span>
+                    <button onclick="clearFile()" class="clear-btn">✕</button>
+                </div>
+            </div>
+
+            <!-- Text Input Section -->
+            <div class="input-section">
+                <div class="text-input-container">
+                    <textarea 
+                        id="textInput" 
+                        placeholder="Or type/paste your text here... (max 50,000 characters)"
+                        rows="3"
+                        maxlength="50000"
+                    ></textarea>
+                    <div class="char-count" id="charCount">0/50000</div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="input-section">
+                <button id="submitBtn" onclick="processContent()" disabled>
+                    <span id="submitText">Process Content</span>
+                    <div id="loadingSpinner" class="spinner" style="display: none;"></div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFile = null;
+
+        // File input handling
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Check file size (5MB limit)
+                const maxSize = 5 * 1024 * 1024; // 5MB
+                if (file.size > maxSize) {
+                    alert('File is too large. Please select a file smaller than 5MB.');
+                    this.value = '';
+                    return;
+                }
+                
+                selectedFile = file;
+                document.getElementById('fileName').textContent = file.name;
+                document.getElementById('fileInfo').style.display = 'flex';
+                document.getElementById('fileUploadArea').style.display = 'none';
+                updateSubmitButton();
+            }
+        });
+
+        // Text input handling
+        document.getElementById('textInput').addEventListener('input', function(e) {
+            const length = e.target.value.length;
+            document.getElementById('charCount').textContent = `${length}/50000`;
+            updateSubmitButton();
+        });
+
+        function updateSubmitButton() {
+            const hasFile = selectedFile !== null;
+            const hasText = document.getElementById('textInput').value.trim().length > 0;
+            const submitBtn = document.getElementById('submitBtn');
+            
+            submitBtn.disabled = !(hasFile || hasText);
+        }
+
+        function clearFile() {
+            selectedFile = null;
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileInfo').style.display = 'none';
+            document.getElementById('fileUploadArea').style.display = 'block';
+            updateSubmitButton();
+        }
+
+        function addMessage(content, isUser = false, isError = false) {
+            try {
+                const messagesContainer = document.getElementById('chatMessages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${isUser ? 'user-message' : 'assistant-message'} ${isError ? 'error-message' : ''}`;
+                
+                messageDiv.innerHTML = `
+                    <div class="message-content">
+                        ${content}
+                    </div>
+                `;
+                
+                messagesContainer.appendChild(messageDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            } catch (error) {
+                console.error('Error adding message:', error);
+            }
+        }
+
+        function addCards(cards, source = 'ai', message = '') {
+            try {
+                const messagesContainer = document.getElementById('chatMessages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message assistant-message';
+                
+                if (!cards || cards.length === 0) {
+                    messageDiv.innerHTML = `
+                        <div class="message-content">
+                            <p>No cards were generated. Please try with different content.</p>
+                        </div>
+                    `;
+                } else {
+                    let cardsHTML = '<div class="message-content">';
+                    
+                    // Add source indicator
+                    if (source === 'fallback') {
+                        cardsHTML += '<h3>📋 Simplified Summary Cards:</h3>';
+                        cardsHTML += '<p style="color: #666; font-size: 0.9em; margin-bottom: 15px;">AI processing was slow, showing simplified cards based on your content.</p>';
+                    } else {
+                        cardsHTML += '<h3>📋 AI-Generated Summary Cards:</h3>';
+                    }
+                    
+                    cardsHTML += '<div class="cards-container">';
+                    
+                    cards.forEach((card, index) => {
+                        // Sanitize card content to prevent XSS
+                        const sanitizedCard = card.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                        cardsHTML += `
+                            <div class="card">
+                                <div class="card-header">
+                                    <span class="card-number">Card ${index + 1}</span>
+                                </div>
+                                <div class="card-content">
+                                    <p>${sanitizedCard}</p>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    cardsHTML += '</div></div>';
+                    messageDiv.innerHTML = cardsHTML;
+                }
+                
+                messagesContainer.appendChild(messageDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            } catch (error) {
+                console.error('Error adding cards:', error);
+                addMessage('❌ Error displaying cards. Please try again.', false, true);
+            }
+        }
+
+        async function processContent() {
+            const selectedFile = document.getElementById('fileInput').files[0];
+            const textInput = document.getElementById('textInput').value.trim();
+            
+            if (!selectedFile && !textInput) {
+                showError('Please upload a file or enter text to process.');
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            
+            submitBtn.disabled = true;
+            submitText.textContent = 'Processing...';
+            loadingSpinner.style.display = 'inline-block';
+            
+            try {
+                let response;
+                let data;
+                
+                if (selectedFile) {
+                    // Process file
+                    const formData = new FormData();
+                    formData.append('file', selectedFile);
+                    
+                    // Add user message
+                    addMessage(`📄 Uploaded: ${selectedFile.name}`, true);
+                    
+                    response = await fetch('/upload', { 
+                        method: 'POST', 
+                        body: formData 
+                    });
+                } else {
+                    // Process text
+                    if (textInput.length === 0) {
+                        throw new Error('No text provided');
+                    }
+                    
+                    // Add user message
+                    addMessage(`✍️ Text input: ${textInput.substring(0, 100)}${textInput.length > 100 ? '...' : ''}`, true);
+                    
+                    response = await fetch('/process-text', { 
+                        method: 'POST', 
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ text: textInput }) 
+                    });
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                data = await response.json();
+                
+                if (data.error) {
+                    addMessage(`❌ Error: ${data.error}`, false, true);
+                } else if (data.cards && data.cards.length > 0) {
+                    // Add processing info message
+                    addMessage(`⚡ ${data.method} (${data.processingTime})`, false);
+                    addCards(data.cards);
+                } else {
+                    addMessage('No cards were generated. Please try with different content.', false, true);
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage(`❌ Error: ${error.message}`, false, true);
+            } finally {
+                // Reset loading state
+                submitBtn.disabled = false;
+                submitText.textContent = 'Process Content';
+                loadingSpinner.style.display = 'none';
+                
+                // Clear inputs
+                clearFile();
+                document.getElementById('textInput').value = '';
+                document.getElementById('charCount').textContent = '0/50000';
+                updateSubmitButton();
+            }
+        }
+
+        // Initialize the interface
+        document.addEventListener('DOMContentLoaded', function() {
+            updateSubmitButton();
+        });
+        
+        // Utility functions
+        function showError(message) {
+            addMessage(`❌ ${message}`, false, true);
+        }
+        
+        function showLoading(message) {
+            addMessage(`⏳ ${message}`, false);
+        }
+        
+        function hideLoading() {
+            // Remove the last loading message if it exists
+            const messages = document.querySelectorAll('.message');
+            const lastMessage = messages[messages.length - 1];
+            if (lastMessage && lastMessage.textContent.includes('⏳')) {
+                lastMessage.remove();
+            }
+        }
+    </script>
 </body>
 </html>

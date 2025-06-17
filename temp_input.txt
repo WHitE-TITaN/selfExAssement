@@ -1,0 +1,16 @@
+User: Please create 2-3 summary cards from this text.
+
+Document:
+
+
+No. of credits recommended: 3 or 4To verify the certificateRoll No:
+Jan-Apr 2025
+(12 week course)
+Compiler Design
+DHEERAJ KUMAR
+23.19/2534.5/75
+58
+2757
+NPTEL25CS13S1253902661
+
+Assistant:
